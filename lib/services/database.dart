@@ -11,7 +11,7 @@ FirebaseAuth auth = FirebaseAuth.instance;
 String uid = auth.currentUser!.uid;
 
 Future<void> uploadProfile(String filepath) async {
-  CollectionReference users = FirebaseFirestore.instance.collection('Users');
+  CollectionReference users = FirebaseFirestore.instance.collection('account');
   File file = File(filepath);
   try {
     await storage.ref('img/$uid').putFile(file);
@@ -24,27 +24,27 @@ Future<void> uploadProfile(String filepath) async {
   }
 }
 
-Future<bool> userSetup(String fullName, String phoneNumber, String email,
-    String? address, String dateOfBirth, String sex) async {
-  CollectionReference users = FirebaseFirestore.instance.collection('Users');
-CollectionReference mentenance =
+Future<bool> userSetup(String fullName, String email, String? address,
+    String dateOfBirth, String sex) async {
+  CollectionReference users = FirebaseFirestore.instance.collection('account');
+  CollectionReference mentenance =
       FirebaseFirestore.instance.collection('maintenanceDetail');
 
-
   final snapShot = await FirebaseFirestore.instance
-      .collection('Users')
+      .collection('account')
       .doc(uid) // varuId in your case
       .get();
 
   CollectionReference rate = FirebaseFirestore.instance.collection('rate');
   if (!snapShot.exists) {
     try {
-    mentenance.doc(uid).set(
-        {'active': false, 'registeredDate': Timestamp.now()});
-      rate.doc(uid).set({'value': 1, 'count': 1});
+      mentenance
+          .doc(uid)
+          .set({'active': false, 'registeredDate': Timestamp.now()});
+      rate.doc(uid).set({'value': 0, 'count': 0, 'rate': 0});
       users.doc(uid).set({
         'fullName': fullName,
-        'phoneNumber': phoneNumber,
+        'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
         'address': address,
         'photoUrl':
             'https://firebasestorage.googleapis.com/v0/b/maintenance-service-locator.appspot.com/o/img%2Fblank-profile.png?alt=media&token=758d9f6b-f5e1-4a7c-8df7-996d0e1e1136',
@@ -73,9 +73,6 @@ CollectionReference mentenance =
     if (fullName != '') {
       users.doc(uid).update({'fullName': fullName});
     }
-    if (phoneNumber != '') {
-      users.doc(uid).update({'phoneNumber': phoneNumber});
-    }
     if (address != '') {
       users.doc(uid).update({'address': address});
     }
@@ -87,13 +84,12 @@ CollectionReference mentenance =
   return false;
 }
 
-
 Future<void> addLocation2(GeoPoint myLocation) async {
   CollectionReference maintenanceLocations =
       FirebaseFirestore.instance.collection('maintenanceLocations');
 
   DocumentSnapshot<Map<String, dynamic>> a =
-      await FirebaseFirestore.instance.collection('Users').doc(uid).get();
+      await FirebaseFirestore.instance.collection('account').doc(uid).get();
   maintenanceLocations.doc(uid).set({
     // maintenanceLocations.add({
     'location': myLocation,
@@ -136,7 +132,8 @@ Future<void> setRating(double v, String to) async {
     value = va['value'] + v;
     count = va['count'] + 1;
   });
-  rate.doc(to).update({'value': value, 'count': count}).then((_) {
+  rate.doc(to).update(
+      {'value': value, 'count': count, 'rate': (value! / count!)}).then((_) {
     debugPrint('rate added successfully');
   });
 }

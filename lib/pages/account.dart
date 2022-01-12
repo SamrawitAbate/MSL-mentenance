@@ -21,7 +21,6 @@ class _AccountPageState extends State<AccountPage> {
       email = '',
       sex = '',
       address = '',
-      phoneNumber = '',
       dateOfBirth = '',
       password = '';
 
@@ -30,7 +29,7 @@ class _AccountPageState extends State<AccountPage> {
     return Scaffold(
       body: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
-              .collection('Users')
+              .collection('account')
               .doc(uid)
               .snapshots(),
           builder:
@@ -71,15 +70,11 @@ class _AccountPageState extends State<AccountPage> {
                         },
                         decoration: const InputDecoration(labelText: 'email'),
                       ),
-                      TextFormField(
-                        initialValue: data['phoneNumber'] ?? '',
-                        onChanged: (v) {
-                          setState(() {
-                            phoneNumber = v;
-                          });
-                        },
-                        decoration:
-                            const InputDecoration(labelText: 'phone number'),
+                      Row(
+                        children: [
+                          const Text('phone number'),
+                          Text(data['phoneNumber']),
+                        ],
                       ),
                       TextFormField(
                         initialValue: data['address'] ?? '',
@@ -95,8 +90,8 @@ class _AccountPageState extends State<AccountPage> {
                       addList('Reference Material', 'referenceMaterial'),
                       ElevatedButton(
                           onPressed: () {
-                            userSetup(fullName, phoneNumber, email, address,
-                                dateOfBirth, sex);
+                            userSetup(
+                                fullName, email, address, dateOfBirth, sex);
                           },
                           child: const Text('update'))
                     ],

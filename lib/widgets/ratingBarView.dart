@@ -14,9 +14,8 @@ class RatingBarCustom extends StatelessWidget {
         future: FirebaseFirestore.instance.collection('rate').doc(to).get(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            double rate = snapshot.data!['value'] / snapshot.data!['count'];
             return RatingBar.builder(
-              initialRating: rate,
+              initialRating:  snapshot.data!['rate'],
               itemCount: 5,
               itemBuilder: (context, index) {
                 switch (index) {

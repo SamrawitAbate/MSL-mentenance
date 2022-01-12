@@ -33,7 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
           appBar: widget.my ? null : AppBar(),
           body: StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('Users')
+                  .collection('account')
                   .doc(widget.uid)
                   .snapshots(),
               builder: (BuildContext context,
@@ -60,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ])),
                             child: Stack(
                               children: [
-                               SizedBox(
+                                SizedBox(
                                   width: double.infinity,
                                   height: 250.0,
                                   child: Center(
@@ -71,7 +71,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: <Widget>[
-                                          ChangePhoto(url:  data['photoUrl'], my: widget.my),
+                                          ChangePhoto(
+                                              url: data['photoUrl'],
+                                              my: widget.my),
                                           const SizedBox(
                                             height: 10.0,
                                           ),
