@@ -9,7 +9,7 @@ import 'package:maintenance/widgets/ratingBarView.dart';
 import 'package:maintenance/widgets/showAlertialog.dart';
 
 class ActivityPage extends StatefulWidget {
-  const ActivityPage({ Key? key}) : super(key: key);
+  const ActivityPage({Key? key}) : super(key: key);
 
   @override
   State<ActivityPage> createState() => _ActivityPageState();
@@ -179,10 +179,10 @@ class ActionSelection extends StatelessWidget {
   final String uid;
   final GeoPoint location;
 
-
   @override
   Widget build(BuildContext context) {
-    final GeoPoint position = getUserLocation() as GeoPoint;
+    GeoPoint? position;
+    getUserLocation().then((value) => position = value);
     switch (indexValue) {
       case 0:
         return Align(
@@ -194,7 +194,7 @@ class ActionSelection extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => MapPage(
-                            position: position, destination: location)));
+                            position: position!, destination: location)));
               },
               child: const Text('Accept')),
         );

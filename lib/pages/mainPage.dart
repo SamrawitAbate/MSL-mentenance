@@ -32,11 +32,11 @@ class _MainPageState extends State<MainPage> {
 
   GeoPoint? cPosition;
   @override
-  void initState() {
+  void initState()  {
     super.initState();
-    cPosition=getUserLocation() as GeoPoint;
-      pages = [
-     const ActivityPage(),
+    getUserLocation().then((value) => cPosition=value);
+    pages = [
+      const ActivityPage(),
       ProfilePage(
         my: true,
         uid: uid,
@@ -168,7 +168,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
- 
   void _handleMenuButtonPressed() {
     // NOTICE: Manage Advanced Drawer state through the Controller.
     // _advancedDrawerController.value = AdvancedDrawerValue.visible();
