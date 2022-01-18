@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:maintenance/services/database.dart';
 
-
-
-popUp(BuildContext context, String lable) {
+popUp(
+  BuildContext context,
+  String lable, {
+  required String id,
+}) {
   String value;
   bool onPressed = false;
   TextEditingController valueController = TextEditingController();
@@ -38,7 +41,12 @@ popUp(BuildContext context, String lable) {
                   child: ElevatedButton(
                     child: const Text("Send"),
                     onPressed: () {
-                      onPressed = true;
+                     if(lable=='Complain'){
+                       giveComplain(valueController.text, id);
+                     }
+                     if(lable=='Comment'){
+                       giveComment(valueController.text, id);
+                     }
                       Navigator.pop(context);
                     },
                   ),
@@ -48,6 +56,6 @@ popUp(BuildContext context, String lable) {
           ),
         );
       });
-  value = valueController.text;
-  return [value, onPressed];
+  
+  return;
 }

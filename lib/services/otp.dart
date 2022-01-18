@@ -12,7 +12,7 @@ class OTPScreen extends StatefulWidget {
 }
 
 class _OTPScreenState extends State<OTPScreen> {
-  String _verificationCode='';
+  String _verificationCode = '';
   final TextEditingController _pinPutController = TextEditingController();
   final FocusNode _pinPutFocusNode = FocusNode();
   final BoxDecoration pinPutDecoration = BoxDecoration(
@@ -61,7 +61,7 @@ class _OTPScreenState extends State<OTPScreen> {
                           verificationId: _verificationCode, smsCode: pin))
                       .then((value) async {
                     if (value.user != null) {
-                      userSetup('', '', '', '', '');
+                      userSetup(otp:true);
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
@@ -90,7 +90,7 @@ class _OTPScreenState extends State<OTPScreen> {
               .signInWithCredential(credential)
               .then((value) async {
             if (value.user != null) {
-              userSetup('', '', '', '', '');
+              userSetup(otp: true);
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const Autenticate()),

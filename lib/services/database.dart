@@ -24,8 +24,14 @@ Future<void> uploadProfile(String filepath) async {
   }
 }
 
-Future<bool> userSetup(String fullName, String email, String? address,
-    String dateOfBirth, String sex) async {
+Future<bool> userSetup(
+    {required bool otp,
+    String? fullName,
+    String? email,
+    String? address,
+    Timestamp? dateOfBirth,
+    String? sex,
+    String? skill}) async {
   CollectionReference users = FirebaseFirestore.instance.collection('account');
   CollectionReference mentenance =
       FirebaseFirestore.instance.collection('maintenanceDetail');
@@ -36,39 +42,46 @@ Future<bool> userSetup(String fullName, String email, String? address,
       .get();
 
   CollectionReference rate = FirebaseFirestore.instance.collection('rate');
-  if (!snapShot.exists) {
-    try {
-      mentenance
-          .doc(uid)
-          .set({'active': false, 'registeredDate': Timestamp.now()});
-      rate.doc(uid).set({'value': 0, 'count': 0, 'rate': 0});
-      users.doc(uid).set({
-        'fullName': fullName,
-        'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
-        'address': address,
-        'photoUrl':
-            'https://firebasestorage.googleapis.com/v0/b/maintenance-service-locator.appspot.com/o/img%2Fblank-profile.png?alt=media&token=758d9f6b-f5e1-4a7c-8df7-996d0e1e1136',
-        'email': email,
-        'dateOfBirth': dateOfBirth == ''
-            ? Timestamp.fromDate(DateTime(1000, 10, 10))
-            : dateOfBirth,
-        'sex': sex
-      }).then((value) {
-        return true;
-      }).onError((error, stackTrace) {
-        debugPrint(error.toString());
+
+  if (otp) {
+    if (!snapShot.exists) {
+      try {
+        mentenance.doc(uid).set({
+          'active': false,
+          'disable': false,
+          'skill': '',
+          'registeredDate': Timestamp.now()
+        });
+        rate.doc(uid).set({'value': 0, 'count': 0, 'rate': 0});
+        users.doc(uid).set({
+          'fullName': '',
+          'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
+          'address': '',
+          'photoUrl':
+              'https://firebasestorage.googleapis.com/v0/b/maintenance-service-locator.appspot.com/o/img%2Favatar.png?alt=media&token=b5bd012f-d7eb-445a-a9ce-fe192b21cfeb',
+          'email': '',
+          'dateOfBirth': Timestamp.fromDate(DateTime(1000, 10, 10)),
+          'sex': ''
+        }).then((value) {
+          return true;
+        }).onError((error, stackTrace) {
+          debugPrint(error.toString());
+          return false;
+        });
+      } catch (e) {
+        debugPrint(e.toString());
         return false;
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-      return false;
+      }
     }
   } else {
-    if (dateOfBirth != '') {
+    if (dateOfBirth != Timestamp.fromDate(DateTime(1000, 10, 10))) {
       users.doc(uid).update({'dateOfBirth': dateOfBirth});
     }
     if (sex != '') {
       users.doc(uid).update({'sex': sex});
+    }
+    if (skill != '') {
+      mentenance.doc(uid).update({'slill': skill});
     }
     if (fullName != '') {
       users.doc(uid).update({'fullName': fullName});
@@ -105,7 +118,7 @@ Future<void> addLocation2(GeoPoint myLocation) async {
 Stream<QuerySnapshot> select(String status) {
   Stream<QuerySnapshot> activity = FirebaseFirestore.instance
       .collection('activity')
-      .where('user_id', isEqualTo: uid)
+      .where('skill_id', isEqualTo: uid)
       .where('status', isEqualTo: status)
       .snapshots();
   return activity;
@@ -119,6 +132,20 @@ Future<void> giveComment(String message, String to) async {
     'to': to,
     'message': message,
     'time': Timestamp.now()
+  }).then((_) {
+    debugPrint('comment added successfully');
+  });
+}
+
+Future<void> giveComplain(String message, String to) async {
+  CollectionReference complain =
+      FirebaseFirestore.instance.collection('complain');
+  complain.add({
+    'from': uid,
+    'to': to,
+    'message': message,
+    'time': Timestamp.now(),
+    'who': 'User'
   }).then((_) {
     debugPrint('comment added successfully');
   });
@@ -152,6 +179,15 @@ Future<void> uploadFile(String filepath, String filename, String dir) async {
   File file = File(filepath);
   try {
     await storage.ref('$dir/$uid/$filename').putFile(file);
+  } catch (e) {
+    debugPrint(e.toString());
+    throw Exception(e);
+  }
+}
+
+Future<void> deleteFile(String filename, String dir) async {
+  try {
+    await storage.ref('$dir/$uid/$filename').delete();
   } catch (e) {
     debugPrint(e.toString());
     throw Exception(e);

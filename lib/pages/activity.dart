@@ -203,12 +203,14 @@ class ActionSelection extends StatelessWidget {
           children: [
             ElevatedButton(
                 onPressed: () async {
-                  List v = popUp(context, 'Message');
-                  if (v[1]) {
-                    giveComment(v[0], uid);
-                  }
+                  popUp(context, 'Comment', id: uid);
                 },
                 child: const Text('Comment')),
+            ElevatedButton(
+                onPressed: () async {
+                  popUp(context, 'Complain', id: uid);
+                },
+                child: const Text('Complain')),
             ElevatedButton(
                 onPressed: () {
                   changeStatus(uid, 'Completed');
@@ -223,10 +225,12 @@ class ActionSelection extends StatelessWidget {
           children: [
             ElevatedButton(
                 onPressed: () async {
-                  List v = popUp(context, 'Message');
-                  if (v[1]) {
-                    giveComment(v[0], uid);
-                  }
+                  popUp(context, 'Complain', id: uid);
+                },
+                child: const Text('Complain')),
+            ElevatedButton(
+                onPressed: () async {
+                  popUp(context, 'Comment', id: uid);
                 },
                 child: const Text('Comment')),
             ElevatedButton(
