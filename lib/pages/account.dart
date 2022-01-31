@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:maintenance/services/auth.dart';
 import 'package:maintenance/services/database.dart';
 import 'package:maintenance/widgets/listFile.dart';
 import 'package:maintenance/widgets/loading.dart';
@@ -24,33 +25,30 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
       sex = '',
       address = '',
       skill = '',
-      dateOfBirth = '',
       password = '';
   final formGlobalKey = GlobalKey<FormState>();
   Gender? _character = Gender.female;
   DateTime selectedDate = DateTime.now();
-  Future<void> _selectDate(BuildContext context) async {
-    await showDatePicker(
-            context: context,
-            initialDate: selectedDate,
-            firstDate: DateTime(1950),
-            lastDate: DateTime(2222))
-        .then((picked) {
-      if (picked != null && picked != selectedDate) {
-        setState(() {
-          selectedDate = picked;
-        });
-      }
-      return;
-    });
-  }
 
+  bool first = true;
   String ageMessage = '';
   @override
   Widget build(BuildContext context) {
     const TextStyle st = TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const Autenticate()));
+              },
+              icon: const Icon(Icons.logout),
+            ),
+          ],
+        ),
         body: StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('account')
@@ -63,11 +61,15 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
               if (snapshot.hasData) {
                 var data = snapshot.data!;
 
-                if (data['dateOfBirth'] !=
-                    Timestamp.fromDate(DateTime(1000, 10, 10))) {
-                  //   setState(() {
+                if (first &&
+                    data['dateOfBirth'] !=
+                        Timestamp.fromDate(DateTime(1000, 10, 10))) {
                   selectedDate = data['dateOfBirth'].toDate();
-                  //   });
+                }
+                if (first) {
+                  _character =
+                      data['sex'] == 'Male' ? Gender.male : Gender.female;
+                  first = false;
                 }
                 return Form(
                   key: formGlobalKey,
@@ -158,7 +160,6 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
                         Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: <Widget>[
-                            // Text("${selectedDate.toLocal()}".split(' ')[0]),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
@@ -170,9 +171,22 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
                               height: 20.0,
                             ),
                             OutlinedButton(
-                              onPressed: () => _selectDate(context),
+                              onPressed: () async {
+                                await showDatePicker(
+                                        context: context,
+                                        initialDate: selectedDate,
+                                        firstDate: DateTime(1950),
+                                        lastDate: DateTime.now())
+                                    .then((value) {
+                                  if (value != null && value != selectedDate) {
+                                    setState(() {
+                                      selectedDate = value;
+                                    });
+                                  }
+                                });
+                              },
                               child: const Text(
-                                'Select date',
+                                'Select DOB',
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w600),
                               ),
@@ -240,9 +254,6 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
                               }
                               return Container();
                             }),
-                        addList('Certificate', 'certificate'),
-                        addList('Education Background', 'educationBackground'),
-                        addList('Reference Material', 'referenceMaterial'),
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               onPrimary: Colors.white,
@@ -259,9 +270,11 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
                                   });
 
                                   formGlobalKey.currentState!.save();
-                                  userSetup(otp: false,
+                                  userSetup(
+                                          otp: false,
                                           fullName: fullName,
                                           email: email,
+                                          skill: skill,
                                           address: address,
                                           dateOfBirth:
                                               Timestamp.fromDate(selectedDate),
@@ -269,11 +282,11 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
                                               ? 'Female'
                                               : 'Male')
                                       .then((value) {
-                                    value
-                                        ? const SnackBar(
-                                            content: Text('Updated'))
-                                        : const SnackBar(
-                                            content: Text('Update failed'));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(value
+                                                ? 'Updated'
+                                                : 'Not updated')));
                                   });
                                 } else {
                                   setState(() {
@@ -286,7 +299,14 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
                               'Update',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.w600),
-                            ))
+                            )),
+                        const Divider(),
+                        addList('Certificate', 'certificate'),
+                        const Divider(),
+                        addList('Education Background', 'educationBackground'),
+                        const Divider(),
+                        addList('Reference Material', 'referenceMaterial'),
+                        const Divider(),
                       ],
                     ),
                   ),
@@ -302,7 +322,10 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
   Column addList(String lable, String value) {
     return Column(
       children: [
-        Text(lable),
+        Text(
+          lable,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+        ),
         addFile(value),
         ListFile(dir: value),
       ],
@@ -325,7 +348,7 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
   }
 
   addFile(dir) {
-    return ElevatedButton(
+    return OutlinedButton(
       style: ElevatedButton.styleFrom(
         primary: Colors.black12,
       ),
@@ -341,8 +364,6 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
         }
         final path = results.files.single.path;
         final fileName = results.files.single.name;
-        print(path);
-        print(fileName);
         uploadFile(path!, fileName, dir).then((value) => setState(() {}));
       },
       child: const Text('Upload'),

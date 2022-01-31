@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:maintenance/pages/profile.dart';
 import 'package:maintenance/services/auth.dart';
 import 'package:maintenance/pages/activity.dart';
@@ -32,14 +30,15 @@ class _MainPageState extends State<MainPage> {
 
   GeoPoint? cPosition;
   @override
-  void initState()  {
+  void initState() {
     super.initState();
-    getUserLocation().then((value) => cPosition=value);
+    getUserLocation().then((value) => cPosition = value);
     pages = [
       const ActivityPage(),
       ProfilePage(
         my: true,
         uid: uid,
+        user: false,
       )
     ];
   }
@@ -140,6 +139,14 @@ class _MainPageState extends State<MainPage> {
                 title: const Text('Make visible'),
               ),
               ListTile(
+                onTap: () {
+                  showAboutDialog(
+                      context: context, applicationName: 'Maintenance app');
+                },
+                leading: const Icon(Icons.info),
+                title: const Text('About'),
+              ),
+              ListTile(
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
                   Navigator.of(context).push(
@@ -158,7 +165,7 @@ class _MainPageState extends State<MainPage> {
                   margin: const EdgeInsets.symmetric(
                     vertical: 16.0,
                   ),
-                  child: const Text('Terms of Service | Privacy Policy'),
+                  child: const Text('MAINTENANCE SERVICE LOCATOR'),
                 ),
               ),
             ],
@@ -169,8 +176,6 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _handleMenuButtonPressed() {
-    // NOTICE: Manage Advanced Drawer state through the Controller.
-    // _advancedDrawerController.value = AdvancedDrawerValue.visible();
     _advancedDrawerController.showDrawer();
   }
 }

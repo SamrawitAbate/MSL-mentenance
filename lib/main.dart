@@ -2,6 +2,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:maintenance/services/auth.dart';
+import 'package:maintenance/widgets/loading.dart';
 import '../services/location.dart';
 
 void main() {
@@ -9,9 +10,7 @@ void main() {
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Maintenance service locator',
-      theme: ThemeData(
-        brightness: Brightness.dark,fontFamily:'Numans'
-      ),
+      theme: ThemeData(brightness: Brightness.dark, fontFamily: 'Numans'),
       home: const App()));
 }
 
@@ -61,7 +60,6 @@ class _AppState extends State<App> {
         ),
       );
     }
-    debugPrint('*-*Main' * 10);
     getPermision();
     return FutureBuilder(
       future: _initialization,
@@ -72,7 +70,7 @@ class _AppState extends State<App> {
         if (snapshot.connectionState == ConnectionState.done) {
           return const Autenticate();
         }
-        return const Center(child: Icon(Icons.circle_outlined));
+        return const Loading();
       },
     );
   }

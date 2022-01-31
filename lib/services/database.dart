@@ -81,7 +81,7 @@ Future<bool> userSetup(
       users.doc(uid).update({'sex': sex});
     }
     if (skill != '') {
-      mentenance.doc(uid).update({'slill': skill});
+      mentenance.doc(uid).update({'skill': skill});
     }
     if (fullName != '') {
       users.doc(uid).update({'fullName': fullName});
@@ -104,10 +104,10 @@ Future<void> addLocation2(GeoPoint myLocation) async {
   DocumentSnapshot<Map<String, dynamic>> a =
       await FirebaseFirestore.instance.collection('account').doc(uid).get();
   maintenanceLocations.doc(uid).set({
-    // maintenanceLocations.add({
     'location': myLocation,
     'skill': '',
     'name': a['fullName'],
+    'photoUrl': a['photoUrl'],
     'lastLocation': Timestamp.now(),
     'distance': 0
   }).then((_) {
@@ -196,8 +196,6 @@ Future<void> deleteFile(String filename, String dir) async {
 
 Future<firebase_storage.ListResult> listFiles(String dir) async {
   firebase_storage.ListResult result = await storage.ref('$dir/$uid').listAll();
-  result.items.forEach((firebase_storage.Reference ref) {
-    print('Found $ref');
-  });
+ 
   return result;
 }

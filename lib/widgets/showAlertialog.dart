@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:maintenance/services/database.dart';
 
@@ -6,8 +8,6 @@ popUp(
   String lable, {
   required String id,
 }) {
-  String value;
-  bool onPressed = false;
   TextEditingController valueController = TextEditingController();
   showDialog(
       context: context,

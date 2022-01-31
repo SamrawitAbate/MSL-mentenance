@@ -37,6 +37,7 @@ class _LoginState extends State<Login> {
                     margin: const EdgeInsets.only(top: 40, right: 10, left: 10),
                     child: TextField(
                       decoration: const InputDecoration(
+                        
                         hintText: 'Phone Number',
                         prefix: Padding(
                           padding: EdgeInsets.all(4),

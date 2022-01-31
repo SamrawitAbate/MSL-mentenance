@@ -1,12 +1,13 @@
-import 'package:maintenance/pages/map0.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:maintenance/pages/profile.dart';
 import 'package:maintenance/services/database.dart';
 import 'package:maintenance/services/location.dart';
 import 'package:maintenance/widgets/loading.dart';
-import 'package:maintenance/widgets/ratingBarView.dart';
+import 'package:maintenance/widgets/ratingDialog.dart';
 import 'package:maintenance/widgets/showAlertialog.dart';
+import 'package:map_launcher/map_launcher.dart';
 
 class ActivityPage extends StatefulWidget {
   const ActivityPage({Key? key}) : super(key: key);
@@ -146,21 +147,57 @@ class _StoreListTileState extends State<StoreListTile> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Text(
-            widget.document['user_id'],
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-          ),
+          StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('account')
+                  .doc(widget.document['user_id'])
+                  .snapshots(),
+              builder:
+                  (BuildContext context, AsyncSnapshot<DocumentSnapshot> snap) {
+                if (snap.hasError) return Text('Error = ${snap.error}');
+
+                if (snap.hasData) {
+                  var data = snap.data!;
+                  return Row(
+                    children: [
+                      InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfilePage(
+                                        my: false,
+                                        user: true,
+                                        uid: widget.document['user_id'])));
+                          },
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(data['photoUrl']),
+                          )),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          data['fullName'],
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 25),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Container();
+              }),
           Text(
             widget.document['job_description'],
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
           ),
           Text(
-            widget.document['request_time'].toDate().toString(),
+           '${widget.document['request_time'].toDate()}'.split('.')[0],
             style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
           ),
           ActionSelection(
               indexValue: widget.indexValue,
-              uid: widget.document.id,
+              uid: widget.document['user_id'],
               location: widget.document['location']),
         ],
       ),
@@ -168,7 +205,7 @@ class _StoreListTileState extends State<StoreListTile> {
   }
 }
 
-class ActionSelection extends StatelessWidget {
+class ActionSelection extends StatefulWidget {
   const ActionSelection(
       {Key? key,
       required this.indexValue,
@@ -180,42 +217,92 @@ class ActionSelection extends StatelessWidget {
   final GeoPoint location;
 
   @override
-  Widget build(BuildContext context) {
-    GeoPoint? position;
+  State<ActionSelection> createState() => _ActionSelectionState();
+}
+
+class _ActionSelectionState extends State<ActionSelection> {
+  late GeoPoint position;
+  @override
+  void initState() {
+    super.initState();
     getUserLocation().then((value) => position = value);
-    switch (indexValue) {
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    switch (widget.indexValue) {
       case 0:
         return Align(
           alignment: Alignment.bottomRight,
-          child: ElevatedButton(
-              onPressed: () {
-                changeStatus(uid, 'Accepted');
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MapPage(
-                            position: position!, destination: location)));
-              },
-              child: const Text('Accept')),
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: ElevatedButton(
+                onPressed: () async {
+                  changeStatus(widget.uid, 'Accepted');
+                  List waypoints = [];
+                  final availableMaps = await MapLauncher.installedMaps;
+
+                  await availableMaps.first.showDirections(
+                    origin: Coords(position.latitude, position.longitude),
+                    originTitle: 'From',
+                    destination: Coords(
+                        widget.location.latitude, widget.location.longitude),
+                    destinationTitle: 'To',
+                    waypoints: waypoints
+                        .map((e) => Coords(e.latitude, e.longitude))
+                        .toList(),
+                  );
+                },
+                child: const Text('Accept')),
+          ),
         );
       case 1:
-        return Row(
+        return Wrap(
           children: [
-            ElevatedButton(
-                onPressed: () async {
-                  popUp(context, 'Comment', id: uid);
-                },
-                child: const Text('Comment')),
-            ElevatedButton(
-                onPressed: () async {
-                  popUp(context, 'Complain', id: uid);
-                },
-                child: const Text('Complain')),
-            ElevatedButton(
-                onPressed: () {
-                  changeStatus(uid, 'Completed');
-                },
-                child: const Text('Complete')),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    popUp(context, 'Comment', id: widget.uid);
+                  },
+                  child: const Text('Comment')),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    popUp(context, 'Complain', id: widget.uid);
+                  },
+                  child: const Text('Complain')),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    changeStatus(widget.uid, 'Completed');
+                  },
+                  child: const Text('Complete')),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    List waypoints = [];
+                    final availableMaps = await MapLauncher.installedMaps;
+
+                    await availableMaps.first.showDirections(
+                      origin: Coords(position.latitude, position.longitude),
+                      originTitle: 'From',
+                      destination: Coords(
+                          widget.location.latitude, widget.location.longitude),
+                      destinationTitle: 'To',
+                      waypoints: waypoints
+                          .map((e) => Coords(e.latitude, e.longitude))
+                          .toList(),
+                    );
+                  },
+                  child: const Text('Direction')),
+            ),
           ],
         );
       case 2:
@@ -223,30 +310,28 @@ class ActionSelection extends StatelessWidget {
       case 3:
         return Row(
           children: [
-            ElevatedButton(
-                onPressed: () async {
-                  popUp(context, 'Complain', id: uid);
-                },
-                child: const Text('Complain')),
-            ElevatedButton(
-                onPressed: () async {
-                  popUp(context, 'Comment', id: uid);
-                },
-                child: const Text('Comment')),
-            ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                            content: Center(
-                          child: RatingBarCustom(
-                            to: uid,
-                          ),
-                        ));
-                      });
-                },
-                child: const Text('Rating')),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    popUp(context, 'Complain', id: widget.uid);
+                  },
+                  child: const Text('Complain')),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    popUp(context, 'Comment', id: widget.uid);
+                  },
+                  child: const Text('Comment')),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                  onPressed: () => popUpRating(context, widget.uid),
+                  child: const Text('Rating')),
+            ),
           ],
         );
       default:

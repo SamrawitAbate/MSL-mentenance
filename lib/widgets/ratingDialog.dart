@@ -1,3 +1,4 @@
+// ignore_for_file: file_names
 
 import 'package:maintenance/widgets/ratingBarView.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ popUpRating(BuildContext context, String id) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          content: RatingBarCustom(to: id,)
+          content: RatingBarCustom(to: id,other: true,)
         );
       });
 }

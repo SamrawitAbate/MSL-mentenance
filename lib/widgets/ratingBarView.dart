@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -5,8 +7,10 @@ import 'package:maintenance/services/auth.dart';
 import 'package:maintenance/services/database.dart';
 
 class RatingBarCustom extends StatelessWidget {
-  const RatingBarCustom({Key? key, required this.to}) : super(key: key);
+  const RatingBarCustom({Key? key, required this.to, required this.other})
+      : super(key: key);
   final String to;
+  final bool other;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +56,7 @@ class RatingBarCustom extends StatelessWidget {
                 }
               },
               onRatingUpdate: (rating) {
-                if (true) {
+                if (other) {
                   setRating(rating, to);
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const Autenticate()));
