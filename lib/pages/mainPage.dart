@@ -140,7 +140,7 @@ class _MainPageState extends State<MainPage> {
                 leading: const Icon(Icons.location_on_outlined),
                 title: const Text('Make visible'),
               ),
-               ListTile(
+              ListTile(
                 onTap: () {
                   _advancedDrawerController.toggleDrawer();
                   Navigator.of(context).push(MaterialPageRoute(
@@ -160,7 +160,7 @@ class _MainPageState extends State<MainPage> {
               ListTile(
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.of(context).push(
+                  Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (_) => const Autenticate()));
                 },
                 leading: const Icon(Icons.logout),
