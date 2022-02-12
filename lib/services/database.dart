@@ -23,6 +23,15 @@ Future<void> uploadProfile(String filepath) async {
     throw Exception(e);
   }
 }
+Future<void> uploadDepositSlip(String filepath) async {
+  File file = File(filepath);
+  try {
+    await storage.ref('slip/$uid').putFile(file);
+  } catch (e) {
+    debugPrint(e.toString());
+    throw Exception(e);
+  }
+}
 
 Future<bool> userSetup(
     {required bool otp,
@@ -36,15 +45,20 @@ Future<bool> userSetup(
   CollectionReference mentenance =
       FirebaseFirestore.instance.collection('maintenanceDetail');
 
-  final snapShot = await FirebaseFirestore.instance
+  final snapShotAccount = await FirebaseFirestore.instance
       .collection('account')
+      .doc(uid) // varuId in your case
+      .get();
+  final snapShotDetail = await FirebaseFirestore.instance
+      .collection('maintenanceDetail')
       .doc(uid) // varuId in your case
       .get();
 
   CollectionReference rate = FirebaseFirestore.instance.collection('rate');
+  CollectionReference license = FirebaseFirestore.instance.collection('license');
 
   if (otp) {
-    if (!snapShot.exists) {
+    if (!snapShotAccount.exists) {
       try {
         mentenance.doc(uid).set({
           'active': false,
@@ -52,6 +66,7 @@ Future<bool> userSetup(
           'skill': '',
           'registeredDate': Timestamp.now()
         });
+        license.doc(uid).set({'useTo': Timestamp.now(),});
         rate.doc(uid).set({'value': 0, 'count': 0, 'rate': 0});
         users.doc(uid).set({
           'fullName': '',
@@ -71,6 +86,18 @@ Future<bool> userSetup(
       } catch (e) {
         debugPrint(e.toString());
         return false;
+      }
+    }else{
+      if (!snapShotDetail.exists) {
+        mentenance.doc(uid).set({
+          'active': false,
+          'disable': false,
+          'skill': '',
+          'registeredDate': Timestamp.now()
+        });
+        license.doc(uid).set({
+          'useTo': Timestamp.now(),
+        });
       }
     }
   } else {

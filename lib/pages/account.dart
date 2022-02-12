@@ -34,6 +34,7 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
   String ageMessage = '';
   @override
   Widget build(BuildContext context) {
+    
     const TextStyle st = TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
     return SafeArea(
       child: Scaffold(

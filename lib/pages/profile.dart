@@ -53,9 +53,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       SingleChildScrollView(
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Column(
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 const SizedBox(
@@ -95,6 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 : Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Divider(),
                                         addList('Certificate', 'certificate'),
@@ -191,13 +194,21 @@ class _ProfilePageState extends State<ProfilePage> {
     return Wrap(
       children: [
         _titleBuild(a),
-        _titleBuild(b),
+        a == 'Phone Number:'? Padding(
+                padding: const EdgeInsets.all(10),
+                child: SelectableText(
+                  b,
+                  style: const TextStyle(
+                      fontStyle: FontStyle.normal, fontSize: 20.0),
+                ))
+            :_titleBuild(b),
       ],
     );
   }
 
   Column addList(String lable, String value) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           lable,

@@ -9,6 +9,8 @@ import 'package:maintenance/pages/activity.dart';
 import 'package:maintenance/services/database.dart';
 import 'package:maintenance/services/location.dart';
 
+import 'licenseUpload.dart';
+
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
@@ -137,6 +139,15 @@ class _MainPageState extends State<MainPage> {
                 },
                 leading: const Icon(Icons.location_on_outlined),
                 title: const Text('Make visible'),
+              ),
+               ListTile(
+                onTap: () {
+                  _advancedDrawerController.toggleDrawer();
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const LicenseUpload()));
+                },
+                leading: const Icon(Icons.payment),
+                title: const Text('Pay up'),
               ),
               ListTile(
                 onTap: () {

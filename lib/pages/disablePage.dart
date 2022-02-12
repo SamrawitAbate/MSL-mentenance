@@ -10,6 +10,7 @@ class DisablePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     FirebaseAuth.instance.signOut();
     return Scaffold(
       body: Column(

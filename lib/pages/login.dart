@@ -12,8 +12,7 @@ class _LoginState extends State<Login> {
   TextEditingController controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    
-    debugPrint('*-*Login' * 10);
+     
     return SafeArea(
       child: Scaffold(
         body: Padding(
