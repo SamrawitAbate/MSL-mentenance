@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:maintenance/services/auth.dart';
 import 'package:maintenance/services/database.dart';
+import 'package:maintenance/widgets/loading.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
 class OTPScreen extends StatefulWidget {
@@ -12,8 +13,9 @@ class OTPScreen extends StatefulWidget {
 }
 
 class _OTPScreenState extends State<OTPScreen> {
- late String _verificationCode ;
+  late String _verificationCode;
   String message = '';
+  bool sent = false;
   final TextEditingController _pinPutController = TextEditingController();
   final FocusNode _pinPutFocusNode = FocusNode();
   final BoxDecoration pinPutDecoration = BoxDecoration(
@@ -26,70 +28,74 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   Widget build(BuildContext context) {
     debugPrint('*-*OTP' * 10);
-    return Scaffold(
+    return !sent
+          ? const Loading()
+          :Scaffold(
       appBar: AppBar(
         title: const Text('OTP Verification'),
       ),
-      body: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 40),
-            child: Center(
-              child: Text(
-                'Verify +251-${widget.phone}',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
-              ),
+      body:  Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 40),
+                  child: Center(
+                    child: Text(
+                      'Verify +251-${widget.phone}',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 26),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: PinPut(
+                    fieldsCount: 6,
+                    textStyle:
+                        const TextStyle(fontSize: 25.0, color: Colors.white),
+                    eachFieldWidth: 40.0,
+                    eachFieldHeight: 55.0,
+                    focusNode: _pinPutFocusNode,
+                    controller: _pinPutController,
+                    submittedFieldDecoration: pinPutDecoration,
+                    selectedFieldDecoration: pinPutDecoration,
+                    followingFieldDecoration: pinPutDecoration,
+                    pinAnimationType: PinAnimationType.fade,
+                    onSubmit: (pin) async {
+                      try {
+                        await FirebaseAuth.instance
+                            .signInWithCredential(PhoneAuthProvider.credential(
+                                verificationId: _verificationCode,
+                                smsCode: pin))
+                            .then((value) async {
+                          if (value.user != null) {
+                            userSetup(otp: true);
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Autenticate()),
+                                (route) => false);
+                          }
+                        });
+                      } catch (e) {
+                        FocusScope.of(context).unfocus();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('invalid OTP')));
+                      }
+                    },
+                  ),
+                ),
+                Text(message)
+              ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(30.0),
-            child: PinPut(
-              fieldsCount: 6,
-              textStyle: const TextStyle(fontSize: 25.0, color: Colors.white),
-              eachFieldWidth: 40.0,
-              eachFieldHeight: 55.0,
-              focusNode: _pinPutFocusNode,
-              controller: _pinPutController,
-              submittedFieldDecoration: pinPutDecoration,
-              selectedFieldDecoration: pinPutDecoration,
-              followingFieldDecoration: pinPutDecoration,
-              pinAnimationType: PinAnimationType.fade,
-              onSubmit: (pin) async {
-                try {
-                  await FirebaseAuth.instance
-                      .signInWithCredential(PhoneAuthProvider.credential(
-                          verificationId: _verificationCode, smsCode: pin))
-                      .then((value) async {
-                    if (value.user != null) {
-                      userSetup(otp:true);
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Autenticate()),
-                          (route) => false);
-                    }
-                  });
-                } catch (e) {
-                  FocusScope.of(context).unfocus();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('invalid OTP')));
-                }
-              },
-            ),
-          ),Text(message)
-        ],
-      ),
     );
   }
 
   _verifyPhone() async {
-   PhoneVerificationCompleted verificationCompleted;
+    PhoneVerificationCompleted verificationCompleted;
     PhoneVerificationFailed verificationFailed;
     PhoneCodeSent codeSent;
     PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout;
-   verificationCompleted =
-        (PhoneAuthCredential phoneAuthCredential) async {
+    verificationCompleted = (PhoneAuthCredential phoneAuthCredential) async {
       await FirebaseAuth.instance
           .signInWithCredential(phoneAuthCredential)
           .then((value) async {
@@ -106,8 +112,7 @@ class _OTPScreenState extends State<OTPScreen> {
               'Phone number automatically verified and user signed in: $phoneAuthCredential')));
     };
 
-    verificationFailed =
-        (FirebaseAuthException authException) {
+    verificationFailed = (FirebaseAuthException authException) {
       setState(() {
         message =
             'Phone number verification failed. Code: ${authException.code}. '
@@ -115,16 +120,17 @@ class _OTPScreenState extends State<OTPScreen> {
       });
     };
 
-    codeSent =
-        (String verificationId, [int? forceResendingToken]) async {
+    codeSent = (String verificationId, [int? forceResendingToken]) async {
+      _verificationCode = verificationId;
+      setState(() {
+        sent = true;
+      });
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Please check your phone for the verification code.')));
 
-      _verificationCode = verificationId;
     };
 
-    codeAutoRetrievalTimeout =
-        (String verificationId) {
+    codeAutoRetrievalTimeout = (String verificationId) {
       _verificationCode = verificationId;
     };
 

@@ -26,7 +26,11 @@ Future<void> uploadProfile(String filepath) async {
 Future<void> uploadDepositSlip(String filepath) async {
   File file = File(filepath);
   try {
-    await storage.ref('slip/$uid').putFile(file);
+ await storage.ref('slip/$uid').putFile(file);
+    String url = await storage.ref('slip/$uid').getDownloadURL();
+    CollectionReference paid =
+        FirebaseFirestore.instance.collection('paid');
+    paid.doc(uid).set({'registeredDate':Timestamp.now(),'url':url});
   } catch (e) {
     debugPrint(e.toString());
     throw Exception(e);
@@ -47,14 +51,14 @@ Future<bool> userSetup(
 
   final snapShotAccount = await FirebaseFirestore.instance
       .collection('account')
-      .doc(uid) // varuId in your case
+      .doc(uid) 
       .get();
   final snapShotDetail = await FirebaseFirestore.instance
       .collection('maintenanceDetail')
-      .doc(uid) // varuId in your case
+      .doc(uid) 
       .get();
 
-  CollectionReference rate = FirebaseFirestore.instance.collection('rate');
+  CollectionReference rate = FirebaseFirestore.instance.collection('SPRate');
   CollectionReference license = FirebaseFirestore.instance.collection('license');
 
   if (otp) {
@@ -95,6 +99,7 @@ Future<bool> userSetup(
           'skill': '',
           'registeredDate': Timestamp.now()
         });
+        rate.doc(uid).set({'value': 0, 'count': 0, 'rate': 0});
         license.doc(uid).set({
           'useTo': Timestamp.now(),
         });
@@ -179,17 +184,16 @@ Future<void> giveComplain(String message, String to) async {
 }
 
 Future<void> setRating(double v, String to) async {
-  CollectionReference rate = FirebaseFirestore.instance.collection('rate');
-  double? value;
-  int? count;
-  rate.doc(uid).get().then((va) {
-    value = va['value'] + v;
-    count = va['count'] + 1;
+  CollectionReference rate = FirebaseFirestore.instance.collection('CRate');
+    late double value, count;
+  await rate.doc(to).get().then((x) {
+    value = x['value'] + v;
+    count = x['count'] + 1.0;
   });
-  rate.doc(to).update(
-      {'value': value, 'count': count, 'rate': (value! / count!)}).then((_) {
-    debugPrint('rate added successfully');
-  });
+
+  double r = value / count;
+
+  await rate.doc(to).set({'value': value, 'count': count, 'rate': r});
 }
 
 Future<void> changeStatus(String id, String status) async {

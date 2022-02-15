@@ -54,8 +54,11 @@ class _LoginState extends State<Login> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
+                      if (controller.text.length==9) {
+                        
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => OTPScreen(controller.text)));
+                      }
                     },
                     child: const Text(
                       'Next',

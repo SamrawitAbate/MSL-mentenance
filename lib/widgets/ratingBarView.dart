@@ -15,7 +15,7 @@ class RatingBarCustom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        future: FirebaseFirestore.instance.collection('rate').doc(to).get(),
+        future: FirebaseFirestore.instance.collection('SPRate').doc(to).get(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return RatingBar.builder(
@@ -58,7 +58,7 @@ class RatingBarCustom extends StatelessWidget {
               onRatingUpdate: (rating) {
                 if (other) {
                   setRating(rating, to);
-                  Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
                       builder: (context) => const Autenticate()));
                 }
                 debugPrint(rating.toString());

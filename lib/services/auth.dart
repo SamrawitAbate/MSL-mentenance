@@ -46,7 +46,6 @@ class Autenticate extends StatelessWidget {
                       
                         if (snapshot2.hasData) {
                           if (snapshot2.data!) {
-                            // return const MainPage();
                               return FutureBuilder<
                                 DocumentSnapshot<Map<String, dynamic>>>(
                               future: FirebaseFirestore.instance

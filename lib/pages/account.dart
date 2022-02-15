@@ -34,7 +34,6 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
   String ageMessage = '';
   @override
   Widget build(BuildContext context) {
-    
     const TextStyle st = TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
     return SafeArea(
       child: Scaffold(
@@ -43,7 +42,7 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
             IconButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.of(context).push(
+                Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (_) => const Autenticate()));
               },
               icon: const Icon(Icons.logout),
@@ -357,7 +356,7 @@ class _AccountPageState extends State<AccountPage> with InputValidationMixin {
         final results = await FilePicker.platform.pickFiles(
             allowMultiple: false,
             type: FileType.custom,
-            allowedExtensions: ['png', 'jpg', 'png']);
+            allowedExtensions: ['png', 'jpg', 'pdf']);
         if (results == null) {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('No File selected')));
