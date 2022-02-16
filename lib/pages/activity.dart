@@ -233,11 +233,14 @@ class _ActionSelectionState extends State<ActionSelection> {
   Widget build(BuildContext context) {
     switch (widget.indexValue) {
       case 0:
-        return Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: ElevatedButton(
+        return Wrap(
+          children: [
+            ElevatedButton(
+                onPressed: () async {
+                  changeStatus(widget.uid, 'Rejected');
+                },
+                child: const Text('Reject')),
+            ElevatedButton(
                 onPressed: () async {
                   changeStatus(widget.uid, 'Accepted');
                   List waypoints = [];
@@ -255,7 +258,7 @@ class _ActionSelectionState extends State<ActionSelection> {
                   );
                 },
                 child: const Text('Accept')),
-          ),
+          ],
         );
       case 1:
         return Wrap(
