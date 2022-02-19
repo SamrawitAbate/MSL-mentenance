@@ -40,8 +40,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   .snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<DocumentSnapshot> snapshot) {
-                if (snapshot.hasError) return Text('Error = ${snapshot.error}');
-
+                if (snapshot.hasError) {
+                  debugPrint(snapshot.error.toString());
+                  return Center(
+                      child: Row(
+                    children: [
+                      const Icon(Icons.error),
+                      Text(snapshot.error.toString(), maxLines: 3)
+                    ],
+                  ));
+                }
                 if (snapshot.hasData) {
                   var data = snapshot.data!;
                   Timestamp t = data['dateOfBirth'] as Timestamp;
@@ -125,9 +133,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 stream: comment,
                                 builder: (context, snapshot) {
                                   if (snapshot.hasError) {
+                                    debugPrint(snapshot.error.toString());
                                     return Center(
-                                        child:
-                                            Text('Error: ${snapshot.error}'));
+                                        child: Row(
+                                      children: [
+                                        const Icon(Icons.error),
+                                        Text(snapshot.error.toString(),
+                                            maxLines: 3)
+                                      ],
+                                    ));
                                   }
                                   if (snapshot.hasData) {
                                     final List<DocumentSnapshot> documents =
@@ -194,14 +208,15 @@ class _ProfilePageState extends State<ProfilePage> {
     return Wrap(
       children: [
         _titleBuild(a),
-        a == 'Phone Number:'? Padding(
+        a == 'Phone Number:'
+            ? Padding(
                 padding: const EdgeInsets.all(10),
                 child: SelectableText(
                   b,
                   style: const TextStyle(
                       fontStyle: FontStyle.normal, fontSize: 20.0),
                 ))
-            :_titleBuild(b),
+            : _titleBuild(b),
       ],
     );
   }

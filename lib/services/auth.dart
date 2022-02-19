@@ -29,24 +29,44 @@ class Autenticate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
- 
     if (FirebaseAuth.instance.currentUser != null) {
       return FutureBuilder<bool>(
           future: disable(),
           builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-           
-           
             if (snapshot.hasData) {
+              if (snapshot.hasError) {
+                debugPrint(snapshot.error.toString());
+                return Scaffold(
+                  body: Center(
+                      child: Row(
+                    children: [
+                      const Icon(Icons.error),
+                      Text(snapshot.error.toString(), maxLines: 3)
+                    ],
+                  )),
+                );
+              }
               return snapshot.data!
                   ? const DisablePage()
                   : FutureBuilder<bool>(
                       future: active(),
                       builder: (BuildContext context,
                           AsyncSnapshot<bool> snapshot2) {
-                      
+                        if (snapshot2.hasError) {
+                          debugPrint(snapshot2.error.toString());
+                          return Scaffold(
+                            body: Center(
+                                child: Row(
+                              children: [
+                                const Icon(Icons.error),
+                                Text(snapshot2.error.toString(), maxLines: 3)
+                              ],
+                            )),
+                          );
+                        }
                         if (snapshot2.hasData) {
                           if (snapshot2.data!) {
-                              return FutureBuilder<
+                            return FutureBuilder<
                                 DocumentSnapshot<Map<String, dynamic>>>(
                               future: FirebaseFirestore.instance
                                   .collection('license')
@@ -54,6 +74,19 @@ class Autenticate extends StatelessWidget {
                                   .get(),
                               builder: (BuildContext context,
                                   AsyncSnapshot snapshotLic) {
+                                if (snapshotLic.hasError) {
+                                  debugPrint(snapshotLic.error.toString());
+                                  return Scaffold(
+                                    body: Center(
+                                        child: Row(
+                                      children: [
+                                        const Icon(Icons.error),
+                                        Text(snapshot.error.toString(),
+                                            maxLines: 3)
+                                      ],
+                                    )),
+                                  );
+                                }
                                 if (snapshotLic.hasData) {
                                   Timestamp a = snapshotLic.data['useTo'];
                                   DateTime useTo = a.toDate();
@@ -63,7 +96,7 @@ class Autenticate extends StatelessWidget {
                                     return const MainPage();
                                   }
                                 }
-                            
+
                                 return const Loading();
                               },
                             );

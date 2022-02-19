@@ -24,6 +24,16 @@ class _ListFileState extends State<ListFile> {
         future: listFiles(widget.dir),
         builder: (BuildContext context,
             AsyncSnapshot<firebase_storage.ListResult> snapshot) {
+          if (snapshot.hasError) {
+            debugPrint(snapshot.error.toString());
+            return Center(
+                child: Row(
+              children: [
+                const Icon(Icons.error),
+                Text(snapshot.error.toString(), maxLines: 3)
+              ],
+            ));
+          }
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             return ListView.builder(

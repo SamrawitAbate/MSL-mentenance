@@ -9,7 +9,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'MSL',
+      title: 'MSL Service Provider',
       theme: ThemeData(brightness: Brightness.dark, fontFamily: 'Numans'),
       home: const App()));
 }
@@ -52,7 +52,6 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    
     if (!connection) {
       return Scaffold(
         backgroundColor: Colors.grey[900],
@@ -80,7 +79,16 @@ class _AppState extends State<App> {
       future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(child: Icon(Icons.error));
+          debugPrint(snapshot.error.toString());
+          return Scaffold(
+            body: Center(
+                child: Row(
+              children: [
+                const Icon(Icons.error),
+                Text(snapshot.error.toString(), maxLines: 3)
+              ],
+            )),
+          );
         }
         if (snapshot.connectionState == ConnectionState.done) {
           return const Autenticate();

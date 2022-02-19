@@ -34,7 +34,6 @@ class _ActivityPageState extends State<ActivityPage> {
 
   @override
   Widget build(BuildContext context) {
-      
     return Scaffold(
         appBar:
             AppBar(title: Text(title[indexValue]), centerTitle: true, actions: [
@@ -66,7 +65,14 @@ class _ActivityPageState extends State<ActivityPage> {
           stream: status![indexValue],
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              debugPrint(snapshot.error.toString());
+              return Center(
+                  child: Row(
+                children: [
+                  const Icon(Icons.error),
+                  Text(snapshot.error.toString(), maxLines: 3)
+                ],
+              ));
             }
             if (!snapshot.hasData) {
               return const Loading();
@@ -155,8 +161,16 @@ class _StoreListTileState extends State<StoreListTile> {
                   .snapshots(),
               builder:
                   (BuildContext context, AsyncSnapshot<DocumentSnapshot> snap) {
-                if (snap.hasError) return Text('Error = ${snap.error}');
-
+                if (snap.hasError) {
+                  debugPrint(snap.error.toString());
+                  return Center(
+                      child: Row(
+                    children: [
+                      const Icon(Icons.error),
+                      Text(snap.error.toString(), maxLines: 3)
+                    ],
+                  ));
+                }
                 if (snap.hasData) {
                   var data = snap.data!;
                   return Row(
@@ -193,7 +207,7 @@ class _StoreListTileState extends State<StoreListTile> {
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
           ),
           Text(
-           '${widget.document['request_time'].toDate()}'.split('.')[0],
+            '${widget.document['request_time'].toDate()}'.split('.')[0],
             style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
           ),
           ActionSelection(

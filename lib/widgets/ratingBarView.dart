@@ -17,6 +17,16 @@ class RatingBarCustom extends StatelessWidget {
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         future: FirebaseFirestore.instance.collection('SPRate').doc(to).get(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            debugPrint(snapshot.error.toString());
+            return Center(
+                child: Row(
+              children: [
+                const Icon(Icons.error),
+                Text(snapshot.error.toString(), maxLines: 3)
+              ],
+            ));
+          }
           if (snapshot.hasData) {
             return RatingBar.builder(
               initialRating: snapshot.data!['rate'] / 1.0,
