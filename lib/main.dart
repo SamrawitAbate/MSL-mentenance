@@ -10,7 +10,7 @@ void main() {
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'MSL Service Provider',
-      theme: ThemeData(brightness: Brightness.dark, fontFamily: 'Numans'),
+      theme: ThemeData(brightness: Brightness.light, fontFamily: 'Numans'),
       home: const App()));
 }
 

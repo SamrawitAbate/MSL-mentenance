@@ -23,14 +23,14 @@ Future<void> uploadProfile(String filepath) async {
     throw Exception(e);
   }
 }
+
 Future<void> uploadDepositSlip(String filepath) async {
   File file = File(filepath);
   try {
- await storage.ref('slip/$uid').putFile(file);
+    await storage.ref('slip/$uid').putFile(file);
     String url = await storage.ref('slip/$uid').getDownloadURL();
-    CollectionReference paid =
-        FirebaseFirestore.instance.collection('paid');
-    paid.doc(uid).set({'registeredDate':Timestamp.now(),'url':url});
+    CollectionReference paid = FirebaseFirestore.instance.collection('paid');
+    paid.doc(uid).set({'registeredDate': Timestamp.now(), 'url': url});
   } catch (e) {
     debugPrint(e.toString());
     throw Exception(e);
@@ -49,17 +49,16 @@ Future<bool> userSetup(
   CollectionReference mentenance =
       FirebaseFirestore.instance.collection('maintenanceDetail');
 
-  final snapShotAccount = await FirebaseFirestore.instance
-      .collection('account')
-      .doc(uid) 
-      .get();
+  final snapShotAccount =
+      await FirebaseFirestore.instance.collection('account').doc(uid).get();
   final snapShotDetail = await FirebaseFirestore.instance
       .collection('maintenanceDetail')
-      .doc(uid) 
+      .doc(uid)
       .get();
 
   CollectionReference rate = FirebaseFirestore.instance.collection('SPRate');
-  CollectionReference license = FirebaseFirestore.instance.collection('license');
+  CollectionReference license =
+      FirebaseFirestore.instance.collection('license');
 
   if (otp) {
     if (!snapShotAccount.exists) {
@@ -70,14 +69,16 @@ Future<bool> userSetup(
           'skill': '',
           'registeredDate': Timestamp.now()
         });
-        license.doc(uid).set({'useTo': Timestamp.now(),});
+        license.doc(uid).set({
+          'useTo': Timestamp.now(),
+        });
         rate.doc(uid).set({'value': 0, 'count': 0, 'rate': 0});
         users.doc(uid).set({
           'fullName': '',
           'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
           'address': '',
           'photoUrl':
-              'https://firebasestorage.googleapis.com/v0/b/maintenance-service-locator.appspot.com/o/img%2Favatar.png?alt=media&token=b5bd012f-d7eb-445a-a9ce-fe192b21cfeb',
+              'https://firebasestorage.googleapis.com/v0/b/car-service-c12ce.appspot.com/o/img%2Favatar.png?alt=media&token=dc09e09e-c490-4072-b775-77b4a8a74b29',
           'email': '',
           'dateOfBirth': Timestamp.fromDate(DateTime(1000, 10, 10)),
           'sex': ''
@@ -91,7 +92,7 @@ Future<bool> userSetup(
         debugPrint(e.toString());
         return false;
       }
-    }else{
+    } else {
       if (!snapShotDetail.exists) {
         mentenance.doc(uid).set({
           'active': false,
@@ -185,7 +186,7 @@ Future<void> giveComplain(String message, String to) async {
 
 Future<void> setRating(double v, String to) async {
   CollectionReference rate = FirebaseFirestore.instance.collection('CRate');
-    late double value, count;
+  late double value, count;
   await rate.doc(to).get().then((x) {
     value = x['value'] + v;
     count = x['count'] + 1.0;
@@ -227,6 +228,6 @@ Future<void> deleteFile(String filename, String dir) async {
 
 Future<firebase_storage.ListResult> listFiles(String dir) async {
   firebase_storage.ListResult result = await storage.ref('$dir/$uid').listAll();
- 
+
   return result;
 }
